@@ -1,0 +1,55 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+public class PlayerLoader {
+
+    /**
+     * Reads a CSV file and populates an ArrayList and a HashMap.
+     * @param fileName The path to your CSV file.
+     * @param list The ArrayList to store all Player objects.
+     * @param map The HashMap to store Players by their Name.
+     */
+    public void loadPlayerData(String fileName, ArrayList<Player> list, HashMap<String, Player> map) {
+        String line = "";
+        String cvsSplitBy = ",";
+
+        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+            
+            // Skip header
+            br.readLine(); 
+
+            while ((line = br.readLine()) != null) {
+                // This regex handles commas inside quotes if your CSV has them
+                String[] data = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+
+                // Basic validation: ensure the row isn't empty
+                if (data.length < 7) continue;
+
+                try {
+                    String name = data[0].replace("\"", "").trim();
+                    int age = Integer.parseInt(data[1].trim());
+                    String nation = data[2].trim();
+                    String club = data[3].trim();
+                    String position = data[4].trim();
+                    double marketValue = Double.parseDouble(data[5].trim());
+                    double salary = Double.parseDouble(data[6].trim());
+
+                    Player p = new Player(name, age, nation, club, position, marketValue, salary);
+                    
+                    list.add(p);
+                    map.put(name, p);
+
+                } catch (NumberFormatException e) {
+                    System.out.println("Skipping row due to formatting error: " + line);
+                }
+            }
+            System.out.println("Data Load Complete. Total Players: " + list.size());
+
+        } catch (IOException e) {
+            System.err.println("File not found or unreadable: " + e.getMessage());
+        }
+    }
+}
